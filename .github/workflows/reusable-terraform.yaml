@@ -52,34 +52,6 @@ jobs:
           DESTROY=$(jq -r '.${{ inputs.aws-environment }}' ./destroy_config.json)
           echo "destroy=$DESTROY" >> $GITHUB_ENV
 
-      - name: Build and Push Backend Image
-        if: env.destroy != 'true'
-        run: |
-          cd 02-backend/app
-          
-          ECR_REPOSITORY="${{ secrets.aws-account-id }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/sioeuzal-${{ inputs.aws-environment }}"
-          
-          # Login to ECR
-          aws ecr get-login-password --region ${{ inputs.aws-region }} | \
-          docker login --username AWS --password-stdin ${ECR_REPOSITORY}
-          
-          # Build image
-          docker build -t backend-app .
-          
-          # Tag image with timestamp
-          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-          docker tag backend-app:latest ${ECR_REPOSITORY}:${TIMESTAMP}
-          docker tag backend-app:latest ${ECR_REPOSITORY}:latest
-          
-          # Push image
-          docker push ${ECR_REPOSITORY}:${TIMESTAMP}
-          docker push ${ECR_REPOSITORY}:latest
-          
-          # Save image tag for later use
-          echo "IMAGE_TAG=${TIMESTAMP}" >> $GITHUB_ENV
-          
-          cd ../..
-
       - name: Run Terraform destroy
         if: env.destroy == 'true'
         run: |
@@ -130,6 +102,34 @@ jobs:
             
             cd ../..
           done
+      
+      - name: Build and Push Backend Image
+        if: env.destroy != 'true'
+        run: |
+          cd 02-backend/app
+          
+          ECR_REPOSITORY="${{ secrets.aws-account-id }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/sioeuzal-${{ inputs.aws-environment }}"
+          
+          # Login to ECR
+          aws ecr get-login-password --region ${{ inputs.aws-region }} | \
+          docker login --username AWS --password-stdin ${ECR_REPOSITORY}
+          
+          # Build image
+          docker build -t backend-app .
+          
+          # Tag image with timestamp
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          docker tag backend-app:latest ${ECR_REPOSITORY}:${TIMESTAMP}
+          docker tag backend-app:latest ${ECR_REPOSITORY}:latest
+          
+          # Push image
+          docker push ${ECR_REPOSITORY}:${TIMESTAMP}
+          docker push ${ECR_REPOSITORY}:latest
+          
+          # Save image tag for later use
+          echo "IMAGE_TAG=${TIMESTAMP}" >> $GITHUB_ENV
+          
+          cd ../..
 
       - name: Invalidate CloudFront Cache
         if: env.destroy != 'true'
