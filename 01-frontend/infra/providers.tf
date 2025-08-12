@@ -11,6 +11,11 @@ terraform {
       version = ">= 3.5"
     }
   }
+
+  backend "s3" {
+    key     = "frontend/terraform.tfstate"
+    encrypt = true
+  }
 }
 
 provider "aws" {
