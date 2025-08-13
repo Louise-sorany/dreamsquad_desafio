@@ -103,5 +103,5 @@ resource "aws_lambda_permission" "allow_eventbridge_scheduler" {
   action        = "lambda:InvokeFunction"
   function_name = module.lambda_daily_file.lambda_function_name
   principal     = "scheduler.amazonaws.com"
-  source_arn = module.eventbridge_schedule.eventbridge_schedules["daily-file-inserter"].arn
+  source_arn    = module.eventbridge_schedule.eventbridge_schedules["daily-file-inserter"].arn
 }

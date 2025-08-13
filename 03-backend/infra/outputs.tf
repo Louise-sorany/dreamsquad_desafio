@@ -13,11 +13,6 @@ output "public_subnets" {
   value       = module.vpc.public_subnets
 }
 
-output "ecr_repository_url" {
-  description = "URL of the ECR repository"
-  value       = module.ecr.repository_url
-}
-
 output "ecs_cluster_name" {
   description = "Name of the ECS cluster"
   value       = module.ecs.cluster_name

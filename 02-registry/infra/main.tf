@@ -7,7 +7,7 @@ module "ecr" {
   repository_name = local.repo_name
 
   repository_force_delete = true
-  
+
   repository_read_write_access_arns = [data.aws_caller_identity.current.arn]
 
   repository_lifecycle_policy = jsonencode({

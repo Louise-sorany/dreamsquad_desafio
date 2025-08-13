@@ -31,7 +31,7 @@ module "ecs" {
 
       container_definitions = {
         backend-container = {
-          image = "${data.aws_ecr_repository.backend.repository_url}:latest"
+          image     = "${data.aws_ecr_repository.backend.repository_url}:latest"
           cpu       = var.container_cpu
           memory    = var.container_memory
           essential = true
