@@ -81,6 +81,8 @@ module "eventbridge_schedule" {
 
   create_bus = false
 
+  create_role = true
+  role_name   = "eventbridge-${var.environment}-role"
   attach_lambda_policy = true
   lambda_target_arns   = [module.lambda_daily_file.lambda_function_arn]
 
@@ -97,6 +99,7 @@ module "eventbridge_schedule" {
 
   tags = local.tags
 }
+
 
 resource "aws_lambda_permission" "allow_eventbridge_scheduler" {
   statement_id  = "AllowExecutionFromEventBridgeScheduler"
