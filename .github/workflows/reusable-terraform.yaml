@@ -56,7 +56,7 @@ jobs:
         if: env.destroy == 'true'
         run: |
           set -e
-          modules=("01-frontend" "02-registry" "03-backend" "04-cronjob")
+          modules=("04-cronjob" "03-backend" "02-registry" "01-frontend")
           
           for dir in "${modules[@]}"; do
             echo "Destroying infrastructure in: $dir"

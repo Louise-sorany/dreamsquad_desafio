@@ -7,8 +7,9 @@ Este projeto consiste em três módulos principais: frontend estático, backend 
 ```
 sioeuzal/
 ├── 01-frontend/        # Frontend estático (S3 + CloudFront)
-├── 02-backend/         # Backend containerizado (ECS Fargate)
-└── 03-cronjob/        # Cronjob serverless (Lambda + EventBridge)
+├── 02-registry/.       # Repositório do ECR
+├── 03-backend/         # Backend containerizado (ECS Fargate)
+└── 04-cronjob/         # Cronjob serverless (Lambda + EventBridge)
 ```
 
 ## Pré-requisitos
@@ -168,13 +169,7 @@ O projeto utiliza GitHub Actions para CI/CD. Os workflows estão em `.github/wor
 
    | Serviço / Recurso                   | Políticas Gerenciadas AWS FullAccess                                |
    |-----------------------------------|-----------------------------------------------------------------------|
-   | **S3**                            | `AmazonS3FullAccess`                                                  |
-   | **CloudWatch Logs**               | `CloudWatchLogsFullAccess`                                            |
-   | **IAM** (para roles e trust)      | `IAMFullAccess`                                                       |
-   | **Lambda**                        | `AWSLambda_FullAccess`                                                |
-   | **EventBridge**                   | `AmazonEventBridgeFullAccess`                                         |
-   | **ECS / ECR** (se usar container) | `AmazonECS_FullAccess`, `AmazonEC2ContainerRegistryFullAccess`        |
-   | **CloudFront**                    | `CloudFrontFullAccess`                                                |
+   | **S3**                            | `Admin`                                                  |
 
    > ⚠️ **Atenção:**  
    > O uso de políticas FullAccess fornece permissões amplas. Em ambientes de produção, é recomendável criar políticas com o princípio do menor privilégio, limitando permissões apenas ao necessário e restringindo recursos via ARNs.
@@ -200,3 +195,9 @@ O projeto utiliza GitHub Actions para CI/CD. Os workflows estão em `.github/wor
          "dev": false
       }
    ```
+
+7. **Validação**
+
+Front-end - Acessar o domain name da distribuição do CloudFront
+Back-end - Acessar a tarefa no ECS -> http://<ECS-PUBLIC-IP>:5000/
+Cron-job - É possível testar na Lambda manualmente, sem precisar esperar o EventBridge
