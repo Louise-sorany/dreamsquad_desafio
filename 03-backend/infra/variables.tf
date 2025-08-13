@@ -42,4 +42,5 @@ variable "logs_retention_days" {
 variable "container_image_tag" {
   type        = string
   description = "Tag image Docker"
+  default     = "latest"
 }
