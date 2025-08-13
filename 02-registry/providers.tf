@@ -13,7 +13,7 @@ terraform {
   }
 
   backend "s3" {
-    key     = "backend/terraform.tfstate"
+    key     = "registry/terraform.tfstate"
     encrypt = true
   }
 }

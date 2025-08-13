@@ -56,7 +56,7 @@ jobs:
         if: env.destroy == 'true'
         run: |
           set -e
-          modules=("03-cronjob" "02-backend" "01-frontend")
+          modules=("01-frontend" "02-registry" "03-backend" "04-cronjob")
           
           for dir in "${modules[@]}"; do
             echo "Destroying infrastructure in: $dir"
@@ -64,19 +64,18 @@ jobs:
             
             terraform init \
               -backend-config="bucket=${{ inputs.aws-statefile-s3-bucket }}" \
-              -backend-config="region=${{ inputs.aws-region }}" \
-              -backend-config="key=${dir}/terraform.tfstate"
+              -backend-config="region=${{ inputs.aws-region }}"
             
             terraform destroy -var-file=./inventories/${{ inputs.aws-environment }}/terraform.tfvars -auto-approve
             
             cd ../..
           done
 
-      - name: Run Terraform Apply
+      - name: Terraform Apply (Frontend + Registry)
         if: env.destroy != 'true'
         run: |
           set -e
-          modules=("01-frontend" "02-backend" "03-cronjob")
+          modules=("01-frontend" "02-registry")
           
           for dir in "${modules[@]}"; do
             echo "Deploying infrastructure in: $dir"
@@ -85,11 +84,6 @@ jobs:
             terraform init \
               -backend-config="bucket=${{ inputs.aws-statefile-s3-bucket }}" \
               -backend-config="region=${{ inputs.aws-region }}"
-            
-            # Add image tag for backend module
-            if [ "$dir" == "02-backend" ]; then
-              TF_VAR_container_image_tag=${{ env.IMAGE_TAG }}
-            fi
             
             terraform plan -var-file=./inventories/${{ inputs.aws-environment }}/terraform.tfvars -out=tfplan
             terraform apply -auto-approve tfplan
@@ -103,11 +97,11 @@ jobs:
             
             cd ../..
           done
-      
+
       - name: Build and Push Backend Image
         if: env.destroy != 'true'
         run: |
-          cd 02-backend/app
+          cd 03-backend/app
           
           ECR_REPOSITORY="${{ secrets.aws-account-id }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/sioeuzal-${{ secrets.aws-account-id }}"
           
@@ -131,6 +125,32 @@ jobs:
           echo "IMAGE_TAG=${TIMESTAMP}" >> $GITHUB_ENV
           
           cd ../..
+
+      - name: Terraform Apply (Backend + Cronjob)
+        if: env.destroy != 'true'
+        run: |
+          set -e
+          modules=("03-backend" "04-cronjob")
+          
+          for dir in "${modules[@]}"; do
+            echo "Deploying infrastructure in: $dir"
+            cd $dir/infra
+            
+            terraform init \
+              -backend-config="bucket=${{ inputs.aws-statefile-s3-bucket }}" \
+              -backend-config="region=${{ inputs.aws-region }}"
+            
+            if [ "$dir" == "03-backend" ]; then
+              terraform plan -var-file=./inventories/${{ inputs.aws-environment }}/terraform.tfvars \
+                -var "container_image_tag=${{ env.IMAGE_TAG }}" -out=tfplan
+              terraform apply -auto-approve tfplan
+            else
+              terraform plan -var-file=./inventories/${{ inputs.aws-environment }}/terraform.tfvars -out=tfplan
+              terraform apply -auto-approve tfplan
+            fi
+            
+            cd ../..
+          done
 
       - name: Invalidate CloudFront Cache
         if: env.destroy != 'true'

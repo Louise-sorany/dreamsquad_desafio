@@ -38,3 +38,8 @@ variable "logs_retention_days" {
   type        = number
   default     = 30
 }
+
+variable "container_image_tag" {
+  type        = string
+  description = "Tag image Docker"
+}
