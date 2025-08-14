@@ -167,7 +167,7 @@ Essa solução garante uma rotina automatizada e confiável para inserção diá
 ## 📂 Estrutura do Projeto
 
 ```bash
-sioeuzal
+Dreamsquad_desafio
 ├── 01-frontend               # Frontend estático
 │   ├── app
 │   │   └── src              # Código fonte do frontend
